@@ -40,17 +40,21 @@ const App: () => React$Node = () => {
   };
 
   const sendSMS = async () => {
-    await getSMSPermission();
-    SmsAndroid.autoSend(
-      phoneNumber,
-      message,
-      (fail) => {
-        console.log('Failed with this error: ' + fail);
-      },
-      (success) => {
-        console.log('SMS sent successfully');
-      },
-    );
+    try {
+      await getSMSPermission();
+      SmsAndroid.autoSend(
+        phoneNumber,
+        message,
+        (fail) => {
+          console.log('Failed with this error: ' + fail);
+        },
+        (success) => {
+          console.log('SMS sent successfully');
+        },
+      );
+    } catch (err) {
+      // console.log(err)
+    }
   };
 
   return (
