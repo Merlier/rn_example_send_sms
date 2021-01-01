@@ -19,7 +19,7 @@ import {check, request, RESULTS, PERMISSIONS} from 'react-native-permissions';
 import SmsAndroid from 'react-native-get-sms-android';
 
 const App: () => React$Node = () => {
-  const phoneNumber = 'XXXXXXXXXX';
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('Happy new year!');
 
   const getSMSPermission = async () => {
@@ -61,6 +61,12 @@ const App: () => React$Node = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.form}>
         <Text style={styles.title}>Send SMS using react-native on Android</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder={'Phone number'}
+          onChangeText={setPhoneNumber}
+          value={phoneNumber}
+        />
         <TextInput
           style={styles.textInput}
           placeholder={'Message'}
