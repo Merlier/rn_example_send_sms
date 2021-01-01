@@ -6,108 +6,84 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
-  ScrollView,
+  SafeAreaView,
   View,
+  Button,
   Text,
-  StatusBar,
+  TextInput,
 } from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {check, request, RESULTS, PERMISSIONS} from 'react-native-permissions';
+import SmsAndroid from 'react-native-get-sms-android';
 
 const App: () => React$Node = () => {
+  const phoneNumber = 'XXXXXXXXXX';
+  const [message, setMessage] = useState('Happy new year!');
+
+  const getSMSPermission = async () => {
+    try {
+      const checkResult = await check(PERMISSIONS.ANDROID.SEND_SMS);
+      switch (checkResult) {
+        case RESULTS.DENIED:
+          const requestResult = await request(PERMISSIONS.ANDROID.SEND_SMS);
+          return Promise.resolve(requestResult);
+        case RESULTS.GRANTED:
+          return Promise.resolve(checkResult);
+        default:
+          return Promise.reject();
+      }
+    } catch (err) {
+      // console.log(err);
+    }
+  };
+
+  const sendSMS = async () => {
+    await getSMSPermission();
+    SmsAndroid.autoSend(
+      phoneNumber,
+      message,
+      (fail) => {
+        console.log('Failed with this error: ' + fail);
+      },
+      (success) => {
+        console.log('SMS sent successfully');
+      },
+    );
+  };
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.form}>
+        <Text style={styles.title}>Send SMS using react-native on Android</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder={'Message'}
+          onChangeText={setMessage}
+          value={message}
+        />
+        <Button onPress={sendSMS} title="Send SMS" />
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    backgroundColor: '#eee',
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  form: {
+    padding: 20,
   },
-  body: {
-    backgroundColor: Colors.white,
+  title: {
+    fontSize: 20,
+    marginBottom: 20,
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  textInput: {
+    backgroundColor: '#fff',
+    marginBottom: 5,
   },
 });
 
